@@ -1,34 +1,28 @@
-from typing import List
+from typing import List, Any
 from pathlib import Path
 from math import sqrt
 
 from imutils.perspective import four_point_transform
 from imutils import grab_contours, resize
 from skimage.segmentation import clear_border
-from numpy import array, ndarray, expand_dims
+from numpy import array, ndarray, expand_dims, fromstring, uint8
 import cv2
 from tensorflow.keras.preprocessing.image import img_to_array
 from tensorflow.keras.models import load_model
 from sudoku import Sudoku
 
-from image import Image
-
-WAIT_TIME = 2000
+from .image import Image
 
 
 class Board:
     """Class of a sudoku board."""
 
     MNIST_MODELS = {
-        "kuba": Path("/home/kuba/Desktop/mnist-digits-recognition/mnist_model.h5"),
-        "WideResNet": Path("/home/kuba/Desktop/mnist-digits-recognition/WideResNet28_10.h5"),
-        "ResNet164": Path("/home/kuba/Desktop/mnist-digits-recognition/ResNet164.h5"),
-        "MobileNet": Path("/home/kuba/Desktop/mnist-digits-recognition/MobileNet.h5"),
-        "VGG16": Path("/home/kuba/Desktop/mnist-digits-recognition/VGG16.h5"),
+        "WideResNet": Path("/code/api/utils/WideResNet28_10.h5"),
     }
 
-    def prepare_img(self, img_path: Path) -> None:
-        """Load board img.
+    def prepare_img_from_path(self, img_path: Path) -> None:
+        """Load board img from path.
 
         Args:
             img_path (Path): path to board img
@@ -38,6 +32,15 @@ class Board:
         """
         self.original_img = Image(img_path).data
         self._img_path = img_path
+        self.resize_img = resize(self.original_img, width=600)
+
+    def prepare_img_from_file(self, img_file: Any) -> None:
+        """Load board image from file.
+
+        Args:
+            img_file (ndarray): img data
+        """
+        self.original_img = cv2.imdecode(fromstring(img_file, uint8), cv2.IMREAD_UNCHANGED)
         self.resize_img = resize(self.original_img, width=600)
 
     def load_SNN_model(self, model_name: str) -> None:
@@ -56,7 +59,7 @@ class Board:
 
     def ocr_sudoku(self) -> None:
         """OCR sudoku."""
-        if not self._img_path or not self.original_img.any():
+        if not self.original_img.any():
             raise ValueError("image not loaded")
 
         self.image_thresh = self._thresholding_image(self.resize_img)
@@ -68,31 +71,31 @@ class Board:
             self.board_contours,
         )
         self.cells_cords = self._find_cells(self.board)
-        self._board_value = self._board_img_to_board_value()
+        self._value = self._board_img_to_value()
 
     def solve(self) -> None:
         """Sove sudoku."""
-        puzzle = Sudoku(3, 3, board=self.board_value.tolist())
-        self._solved_board = array(puzzle.solve().board)
+        puzzle = Sudoku(3, 3, board=self.value.tolist())
+        self._solved_value = array(puzzle.solve().board)
 
     @property
-    def solved_board(self) -> None:
+    def solved_value(self) -> None:
         """Return solved board."""
-        return self._solved_board
+        return self._solved_value
 
     @property
-    def board_value(self) -> array:
+    def value(self) -> array:
         """Return board representation as array."""
-        return self._board_value
+        return self._value
 
-    @board_value.setter
-    def board_value(self, value: array) -> None:
+    @value.setter
+    def value(self, value: array) -> None:
         """Set board value."""
-        self._board_value = array(value)
+        self._value = array(value)
 
-    def _board_img_to_board_value(self) -> array:
+    def _board_img_to_value(self) -> array:
         """Return board represetation as array from img."""
-        board_value = []
+        value = []
         for cell_cords in self.cells_cords:
             cell = self.board[
                 cell_cords[2] : cell_cords[3],
@@ -103,12 +106,12 @@ class Board:
                 digit = self._find_digit(improved_cell)
                 if digit == 0:
                     digit = 8
-                board_value.append(digit)
+                value.append(digit)
             else:
-                board_value.append(0)
-        board_size = int(sqrt(len(board_value)))
-        board_value = array(board_value)
-        return board_value.reshape(board_size, board_size)
+                value.append(0)
+        board_size = int(sqrt(len(value)))
+        value = array(value)
+        return value.reshape(board_size, board_size)
 
     @staticmethod
     def _thresholding_image(img: ndarray) -> ndarray:
@@ -263,67 +266,3 @@ class Board:
         prediction = self.model.predict(cell_).argmax(axis=1)[0]
 
         return prediction
-
-    def print_img(self) -> None:
-        """Print original image."""
-        cv2.imshow("original image", self.resize_img)
-        cv2.waitKey(WAIT_TIME)
-
-    def print_thresh_board(self) -> None:
-        """Print treshold on image."""
-        cv2.imshow("board after thresholding", self.image_thresh)
-        cv2.waitKey(WAIT_TIME)
-
-    def print_board_contours(self) -> None:
-        """Print image with board contours marked."""
-        board_on_img = self.resize_img
-        cv2.drawContours(
-            board_on_img,
-            [self.board_contours],
-            -1,
-            (255, 255, 0),
-            2,
-        )
-        cv2.imshow("Board contours", board_on_img)
-        cv2.waitKey(WAIT_TIME)
-
-    def print_board(self) -> None:
-        """Print only board."""
-        cv2.imshow("Board", self.board)
-        cv2.waitKey(WAIT_TIME)
-
-    def print_raw_cells(self) -> None:
-        """Print cells one by one."""
-        for cell_cords in self.cells_cords:
-            cell = self.board[
-                cell_cords[2] : cell_cords[3],
-                cell_cords[0] : cell_cords[1],
-            ]
-            cv2.imshow("cells", cell)
-            cv2.waitKey(WAIT_TIME)
-
-    def print_improved_cells(self) -> None:
-        """Print improved img of cells one by one."""
-        for cell_cords in self.cells_cords:
-            cell = self.board[
-                cell_cords[2] : cell_cords[3],
-                cell_cords[0] : cell_cords[1],
-            ]
-            improved_cell = self._cell_image_impovement(cell)
-            print(self._cell_is_empty(improved_cell))
-            cv2.imshow("cells", improved_cell)
-            cv2.waitKey(WAIT_TIME)
-
-    def print_digits(self) -> None:
-        """Print img of cell and digit interpretation."""
-        for cell_cords in self.cells_cords:
-            cell = self.board[
-                cell_cords[2] : cell_cords[3],
-                cell_cords[0] : cell_cords[1],
-            ]
-            improved_cell = self._cell_image_impovement(cell)
-            if not self._cell_is_empty(improved_cell):
-                digit = self._find_digit(improved_cell)
-                print(digit)
-                cv2.imshow("cells", improved_cell)
-                cv2.waitKey(WAIT_TIME)
