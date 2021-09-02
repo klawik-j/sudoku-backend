@@ -6,12 +6,12 @@ from imutils.perspective import four_point_transform
 from imutils import grab_contours, resize
 from skimage.segmentation import clear_border
 from numpy import array, ndarray, expand_dims, fromstring, uint8
-import cv2
 from tensorflow.keras.preprocessing.image import img_to_array
 from tensorflow.keras.models import load_model
-from sudoku import Sudoku
+import cv2
 
 from .image import Image
+from .exceptions import NotProperOCR, SudokuBoardNotFound
 
 
 class Board:
@@ -26,15 +26,15 @@ class Board:
 
         Args:
             img_path (Path): path to board img
-
         Raises:
-            err: no board image have been found
+            err: Image have not been found
         """
-        self.original_img = Image(img_path).data
-        self._img_path = img_path
+        self._data = cv2.imread(img_path)
+        if self._data is None:
+            raise OSError(f"file {img_path} not found")
         self.resize_img = resize(self.original_img, width=600)
 
-    def prepare_img_from_file(self, img_file: Any) -> None:
+    def prepare_img_from_data(self, img_file: bytes) -> None:
         """Load board image from file.
 
         Args:
@@ -72,26 +72,13 @@ class Board:
         )
         self.cells_cords = self._find_cells(self.board)
         self._value = self._board_img_to_value()
-
-    def solve(self) -> None:
-        """Sove sudoku."""
-        puzzle = Sudoku(3, 3, board=self.value.tolist())
-        self._solved_value = array(puzzle.solve().board)
+        if not self._value.any():
+            raise NotProperOCR("No digits found")
 
     @property
-    def solved_value(self) -> None:
-        """Return solved board."""
-        return self._solved_value
-
-    @property
-    def value(self) -> array:
-        """Return board representation as array."""
+    def value(self):
+        """Return _value."""
         return self._value
-
-    @value.setter
-    def value(self, value: array) -> None:
-        """Set board value."""
-        self._value = array(value)
 
     def _board_img_to_value(self) -> array:
         """Return board represetation as array from img."""
@@ -176,7 +163,7 @@ class Board:
             )
             if len(approx) == 4:
                 return approx
-        raise Exception("Sudoku board have not been found")
+        raise SudokuBoardNotFound("Sudoku board not found")
 
     @staticmethod
     def _adjust_perspective(img: ndarray, board_contours: ndarray) -> ndarray:
