@@ -16,7 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from api.urls import urlpatterns as apipatterns
+from userdata.urls import urlpatterns as userdatapatterns
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-] + apipatterns
+] + apipatterns + userdatapatterns

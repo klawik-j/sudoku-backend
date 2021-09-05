@@ -1,4 +1,4 @@
-from typing import List, Any
+from typing import List
 from pathlib import Path
 from math import sqrt
 

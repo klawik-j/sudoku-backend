@@ -1,6 +1,9 @@
+from django.http import JsonResponse, HttpResponse
+
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.http import JsonResponse, HttpResponse
+
 from .utils.utils import solve_puzzle
 from .utils.board import Board
 from .utils.exceptions import BaseOCRException
@@ -8,6 +11,9 @@ from .utils.exceptions import BaseOCRException
 # Create your views here.
 
 class SolveView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, format=None):
         puzzle = request.data["puzzle"]
         solved_puzzle = solve_puzzle(puzzle)
@@ -17,6 +23,9 @@ class SolveView(APIView):
             return Response({"puzzle": puzzle, "solved_puzzle": solved_puzzle})
 
 class OCRView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, format=None):
         board = Board()
         board.prepare_img_from_data(request.data['image'].read())
