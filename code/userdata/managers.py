@@ -14,9 +14,7 @@ class AccountManager(BaseUserManager):
 
         email = self.normalize_email(email)
         user = self.model(email=email, username=username, **extra_fields)
-        print("################### passwd saved")
         user.set_password(password)
-        print("DEBUG: _create_user()")
         now = extra_fields.get("date_joined", timezone.now())
         user.date_joined = now
         user.save(using=self._db)
