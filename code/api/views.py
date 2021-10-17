@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from .utils.utils import solve_puzzle
+from .utils.utils import solve_puzzle, EMPTY_PUZZLE
 from .utils.board import Board
 from .utils.exceptions import BaseOCRException
 
@@ -12,19 +12,24 @@ from .utils.exceptions import BaseOCRException
 
 class SolveView(APIView):
 
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated] TBD v1.0.0
 
     def post(self, request, format=None):
         puzzle = request.data["puzzle"]
         solved_puzzle = solve_puzzle(puzzle)
         if not 1 in solved_puzzle[0]:
-            return Response({"puzzle": puzzle, "error": "sudoku not valid"})
+            return Response({
+                "solved_puzzle": EMPTY_PUZZLE,
+                "error": "sudoku not valid",
+                })
         else:
-            return Response({"puzzle": puzzle, "solved_puzzle": solved_puzzle})
+            return Response({
+                "solved_puzzle": solved_puzzle,
+                "error": ""})
 
 class OCRView(APIView):
 
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated] TBD v1.0.0
 
     def post(self, request, format=None):
         if not 'image' in request.data.keys():
