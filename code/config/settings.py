@@ -26,7 +26,7 @@ SECRET_KEY = str(os.environ["SECRET_KEY"])
 # SECURITY WARNING: don't run with debug turned on in production!
 if int(os.environ["PRODUCTION"]) == 0:
     DEBUG = True
-    ALLOWED_HOSTS = [str(os.environ["DEV_IP"]), "localhost", "127.0.0.1", "10.0.2.2"]
+    ALLOWED_HOSTS = [str(os.environ["DEV_IP"]), "localhost", "127.0.0.1", "10.0.2.2", "192.168.0.24"]
     print("------- DEBUG TRUE -------")
 else:
     DEBUG = False

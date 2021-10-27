@@ -40,6 +40,10 @@ class OCRView(APIView):
         try:
             board.ocr_sudoku()
         except BaseOCRException as err:
-            return Response({"error": f"{err}"})
-
-        return Response({"puzzle": board.value})
+            return Response({
+                "puzzle": EMPTY_PUZZLE,
+                "error": f"{err}"})
+            
+        return Response({
+            "puzzle": board.value,
+            "error": ""})
