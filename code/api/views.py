@@ -36,7 +36,7 @@ class OCRView(APIView):
             return Response({"error": "no image included"})
         board = Board()
         board.prepare_img_from_data(request.data['image'].read())
-        board.load_SNN_model("WideResNet")
+        board.load_SNN_model("cnn")
         try:
             board.ocr_sudoku()
         except BaseOCRException as err:
