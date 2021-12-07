@@ -18,7 +18,7 @@ class Board:
     """Class of a sudoku board."""
 
     MNIST_MODELS = {
-        "WideResNet": Path("/code/api/utils/WideResNet28_10.h5"),
+        "cnn": Path("/code/api/utils/cnn.h5"),
     }
 
     def prepare_img_from_path(self, img_path: Path) -> None:
