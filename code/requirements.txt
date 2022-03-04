@@ -4,7 +4,4 @@ djangorestframework>=3.11,<4.0
 gunicorn>=20.1.0,<21.0.0
 whitenoise>=5.2.0,<6.0.0
 py-sudoku
-imutils==0.5.4
-opencv-python-headless==4.5.3.56
-scikit-image==0.18.2
-tensorflow==2.5.0
+sudoku-ocr
