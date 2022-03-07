@@ -11,16 +11,16 @@ ownership() {
 echo "Updating and installing missing packets"
 pip install -r ./requirements.txt
 echo "Waiting for postgress"
-chmod +x wait-for-it.sh
-./wait-for-it.sh -t 80 $POSTGRES_SERVICE:5432 || exit 1
+chmod +x /scripts/wait-for-it.sh
+/scripts/wait-for-it.sh -t 80 $POSTGRES_SERVICE:5432 || exit 1
 
 echo ''
 echo '--------------------------'
 echo 'Database migration'
 echo '--------------------------'
 echo ''
-python manage.py makemigrations || exit 1
-python manage.py migrate || exit 1
+python /code/manage.py makemigrations || exit 1
+python /code/manage.py migrate || exit 1
 
 echo ''
 echo '--------------------------'
