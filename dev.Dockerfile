@@ -1,0 +1,16 @@
+FROM python:3.8
+
+ENV PYTHONUNBUFFERED 1
+
+COPY ./requirements.txt requirements.txt
+
+RUN apt-get update &&\
+    apt-get install ffmpeg libsm6 libxext6  -y &&\
+    pip install --upgrade pip &&\
+    pip install -r requirements.txt
+
+COPY ./scripts/ /scripts/
+COPY ./code/ /code/
+
+ENTRYPOINT ["bash", "/scripts/docker-entrypoint.sh"]
+CMD ["python3", "/code/manage.py", "runserver", "0.0.0.0:8080"]
