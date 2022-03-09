@@ -1,0 +1,17 @@
+FROM python:3.8
+ENV PYTHONUNBUFFERED 1
+RUN groupadd -r container &&\
+    useradd -r -g container -s /sbin/nologin container_user
+
+COPY ./requirements.txt requirements.txt
+
+RUN apt-get update &&\
+    apt-get install ffmpeg libsm6 libxext6  -y &&\
+    pip install --upgrade pip &&\
+    pip install -r requirements.txt
+
+WORKDIR /code/
+COPY --chown=container_user:container ./code/ /code/
+RUN python manage.py collectstatic --noinput
+USER container_user
+CMD gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
