@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from pathlib import Path
 
+import dj_database_url
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -21,18 +23,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = str(os.environ["SECRET_KEY"])
+SECRET_KEY = os.environ.get("SECRET_KEY", "foo")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-if int(os.environ["PRODUCTION"]) == 0:
+if int(os.environ.get("PRODUCTION", "0")) == 0:
     DEBUG = True
-    ALLOWED_HOSTS = [str(os.environ["DEV_IP"]), "localhost", "127.0.0.1", "10.0.2.2", "192.168.0.24"]
+    ALLOWED_HOSTS = [
+        os.environ.get("DEV_IP"),
+        "localhost",
+        "127.0.0.1",
+    ]
     print("------- DEBUG TRUE -------")  # noqa: T001
 else:
     DEBUG = False
     SESSION_COOKIE_SECURE = True
     ALLOWED_HOSTS = [
-        str(os.environ["SERVER_IP"]),
+        os.environ.get("SERVER_IP"),
     ]
 
 
@@ -59,6 +65,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -85,17 +92,21 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": os.environ["POSTGRES_NAME"],
-        "USER": os.environ["POSTGRES_USER"],
-        "PASSWORD": os.environ["POSTGRES_PASSWORD"],
-        "HOST": os.environ["POSTGRES_SERVICE"],
-        "PORT": os.environ["POSTGRES_PORT"],
+        "NAME": os.environ.get("POSTGRES_NAME"),
+        "USER": os.environ.get("POSTGRES_USER"),
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
+        "HOST": os.environ.get("POSTGRES_SERVICE"),
+        "PORT": os.environ.get("POSTGRES_PORT"),
     }
 }
-
+if not DEBUG:
+    DATABASE_URL = os.environ.get("DATABASE_URL")
+    db_from_url = dj_database_url.config(default=DATABASE_URL, conn_max_age=500, ssl_require=True)
+    DATABASES["default"] = db_from_url
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -134,6 +145,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = "/static/"
+# STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 AUTH_USER_MODEL = "userdata.Account"
 

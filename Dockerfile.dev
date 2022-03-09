@@ -12,5 +12,4 @@ RUN apt-get update &&\
 COPY ./scripts/ /scripts/
 COPY ./code/ /code/
 
-ENTRYPOINT ["bash", "/scripts/docker-entrypoint.sh"]
 CMD ["python3", "/code/manage.py", "runserver", "0.0.0.0:8080"]
