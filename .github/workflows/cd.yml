@@ -16,11 +16,11 @@ jobs:
       - name: Build and push container
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: heroku container:push -a ${{ secrets.HEROKU_APP_NAME }} web 
+        run: heroku container:push web --recursive -a ${{ secrets.HEROKU_APP_NAME }}
       - name: Release container
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: heroku container:release -a ${{ secrets.HEROKU_APP_NAME }} web 
+        run: heroku container:release web -a ${{ secrets.HEROKU_APP_NAME }} 
       - name: Run database migrations
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
