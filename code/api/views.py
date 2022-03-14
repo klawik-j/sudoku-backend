@@ -1,7 +1,5 @@
 from typing import Any
 
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,24 +7,12 @@ from sudoku_ocr import Board
 
 # Create your views here.
 
-REQUEST_SOLVE_BODY = openapi.Schema(
-    type=openapi.TYPE_OBJECT,
-    properties={
-        "puzzle": openapi.Schema(
-            type=openapi.TYPE_ARRAY,
-            items=openapi.Items(type=openapi.TYPE_ARRAY, items=openapi.TYPE_INTEGER),
-            description="2D array of integers representing sudoku puzzle",
-        ),
-    },
-)
-
 
 class SolveView(APIView):
     """Solve view class."""
 
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(request_body=REQUEST_SOLVE_BODY)
     def post(self, request: Any) -> Response:
         """Post method for Solve view."""
         puzzle = request.data["puzzle"]
