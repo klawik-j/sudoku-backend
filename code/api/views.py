@@ -1,9 +1,12 @@
 from typing import Any
 
+from rest_framework import mixins, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from sudoku_ocr import Board
+
+from api.serializers import OcrViewSerializer
 
 # Create your views here.
 
@@ -30,23 +33,25 @@ class SolveView(APIView):
         )
 
 
-# class OCRView(APIView):
+class OcrViewSet(
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet,
+):
+    """ViewSet for api/ocr."""
 
-#     # permission_classes = [IsAuthenticated] TBD v1.0.0
+    permission_classes = [IsAuthenticated]
+    serializer_class = OcrViewSerializer
 
-#     def post(self, request, format=None):
-#         if not 'image' in request.data.keys():
-#             return Response({"error": "no image included"})
-#         board = Board()
-#         board.prepare_img_from_data(request.data['image'].read())
-#         board.load_SNN_model("cnn")
-#         try:
-#             board.ocr_sudoku()
-#         except BaseOCRException as err:
-#             return Response({
-#                 "puzzle": EMPTY_PUZZLE,
-#                 "error": f"{err}"})
+    def create(self, request: Any) -> Response:
+        """Overwite create method to return Response instead of query db."""
+        board = Board()
+        board.prepare_img_from_data(request.data["puzzle_image"].read())
+        board.ocr_sudoku()
 
-#         return Response({
-#             "puzzle": board.value,
-#             "error": ""})
+        return Response(
+            {"puzzle": board.board_value, "error": ""},
+        )
+
+    def get_queryset(self) -> None:
+        """Overwrite qet_queryset method to pass instead of return queryset."""
+        pass

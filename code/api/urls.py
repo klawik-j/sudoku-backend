@@ -1,8 +1,8 @@
-from django.urls import path
+from rest_framework.routers import DefaultRouter
 
 from . import views
 
-urlpatterns = [
-    path("api/solve/", views.SolveView.as_view()),
-    # path('api/ocr/', views.OCRView.as_view()),
-]
+router = DefaultRouter()
+router.register(r"ocr", views.OcrViewSet, basename="ocr")
+
+urlpatterns = [] + router.urls
