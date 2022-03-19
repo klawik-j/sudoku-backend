@@ -1,7 +1,13 @@
 name: CI
 
 on:
-  - pull_request
+  pull_request:
+    paths-ignore:
+      - 'CONTRIBUTING.md'
+      - 'LICENSE'
+      - 'README.md'
+      - '.env.template'
+
 
 jobs:
   test:
