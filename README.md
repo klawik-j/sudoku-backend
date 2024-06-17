@@ -7,12 +7,12 @@ Sudoku-backend is a web service that hosts api endpoints useful for ocr and solv
 ### For recruiters
 Kindly recommend to check also [CONTRIBUTING.md](./CONTRIBUTING.md)
 
-## Hosted
-For presentation purposes web service is [hosted on Heroku](https://klawik-j-sudoku-ocr.herokuapp.com/).
+## ~~Hosted~~ Deploy is down due to heroku not being free anymore.
+~~For presentation purposes web service is [hosted on Heroku](https://klawik-j-sudoku-ocr.herokuapp.com/).~~
 
-To use IsAuthenticated methods You can login as:
-* email: test@test.com
-* username: test
+~~To use IsAuthenticated methods You can login as:~~
+* ~~email: test@test.com~~
+* ~~username: test~~
 
 ## Endpoints
 Available endpoints.
